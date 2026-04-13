@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User App</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .card a {
+            display: block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: white;
+            background: #007BFF;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="top-bar">
+    <button onclick="logout()">Logout</button>
+</div>
+
+<h1>User Management Dashboard</h1>
+
+<div class="container">
+    <div class="card">
+        <h3>Create User</h3>
+        <p>Add a new user to the system</p>
+        <a href="/create.html">Go</a>
+    </div>
+
+    <div class="card">
+        <h3>View Users</h3>
+        <p>Browse and manage users</p>
+        <a href="/view.html">Go</a>
+    </div>
+</div>
+
+<script>
+// Redirect if not logged in
+const token = localStorage.getItem('token');
+
+if (!token) {
+    window.location.href = "/login.html";
+}
+
+// Logout function
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = "/login.html";
+}
+</script>
+
+</body>
+</html>

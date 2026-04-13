@@ -1,0 +1,29 @@
+<h2>Create User</h2>
+
+<form id="userForm">
+  <input type="text" placeholder="Name" id="name" required><br>
+  <input type="email" placeholder="Email" id="email" required><br>
+  <input type="text" placeholder="Phone" id="phone" required><br>
+  <input type="password" placeholder="Password" id="password" required><br>
+  <button type="submit">Create</button>
+</form>
+
+<script>
+document.getElementById('userForm').onsubmit = async (e) => {
+    e.preventDefault();
+
+    const res = await fetch('/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: name.value,
+            email: email.value,
+            phone: phone.value,
+            password: password.value
+        })
+    });
+
+    const data = await res.json();
+    alert(JSON.stringify(data));
+};
+</script>

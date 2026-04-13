@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+            background: #f4f4f4;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            margin: 10% auto;
+            width: 300px;
+            border-radius: 5px;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>User Dashboard</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+</table>
+
+<!-- Modal -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h3>User Details</h3>
+
+        <input id="name" placeholder="Name">
+        <input id="email" placeholder="Email">
+        <input id="phone" placeholder="Phone">
+
+        <button onclick="saveUser()">Save</button>
+        <button onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+const token = localStorage.getItem('token');
+
+if (!token) {
+    window.location.href = "/login.html";
+}
+let currentUserId = null;
+
+async function loadUsers() {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+     });
+
+     if (res.status === 401) {
+        alert("Unauthorized. Please login.");
+        window.location.href = "/login.html";
+        return;
+    }
+        
+    const users = await res.json();
+
+    const table = document.getElementById('userTable');
+    table.innerHTML = '';
+
+    users.forEach(u => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${u.name}</td>
+            <td>${u.email}</td>
+            <td>${u.phone}</td>
+            <td>
+                <button onclick="viewUser('${u._id}')">View</button>
+                <button onclick="editUser('${u._id}')">Edit</button>
+                <button onclick="deleteUser('${u._id}')">Delete</button>
+            </td>
+        `;
+
+        table.appendChild(row);
+    });
+}
+
+async function deleteUser(id) {
+    if (!confirm("Delete this user?")) return;
+
+    const token = localStorage.getItem('token');
+    await fetch(`/users/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    loadUsers();
+}
+
+async function viewUser(id) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/users/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const user = await res.json();
+
+    currentUserId = null; // view only
+
+    document.getElementById('name').value = user.name;
+    document.getElementById('email').value = user.email;
+    document.getElementById('phone').value = user.phone;
+
+    openModal(true);
+}
+
+async function editUser(id) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/users/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const user = await res.json();
+
+    currentUserId = id;
+
+    document.getElementById('name').value = user.name;
+    document.getElementById('email').value = user.email;
+    document.getElementById('phone').value = user.phone;
+
+    openModal(false);
+}
+
+async function saveUser() {
+    if (!currentUserId) {
+        alert("View mode only");
+        return;
+    }
+    const token = localStorage.getItem('token');
+
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+
+    await fetch(`/users/${currentUserId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, phone })
+    });
+
+    closeModal();
+    loadUsers();
+}
+
+function openModal(readOnly) {
+    document.getElementById('modal').style.display = 'block';
+
+    document.getElementById('name').disabled = readOnly;
+    document.getElementById('email').disabled = readOnly;
+    document.getElementById('phone').disabled = readOnly;
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = "/login.html";
+}
+
+loadUsers();
+</script>
+
+</body>
+</html>
