@@ -94,13 +94,14 @@ router.delete('/:id', auth, role(['admin']), async (req, res) => {
         if (req.user.userId === req.params.id) {
             return res.status(400).json({ error: "You cannot delete yourself" });
         }
+
         const deletedUser = await User.findByIdAndDelete(req.params.id);
 
         if (!deletedUser) return res.status(404).json({ error: "User not found" });
 
         res.json({ message: "User deleted" });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
 });
 
