@@ -1,22 +1,130 @@
-<h2>Create User</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create User</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to right, #007BFF, #00c6ff);
+        }
 
-<form id="userForm">
-  <input type="text" placeholder="Name" id="name" required><br>
-  <input type="email" placeholder="Email" id="email" required><br>
-  <input type="text" placeholder="Phone" id="phone" required><br>
-  <input type="password" placeholder="Password" id="password" required><br>
-  <button type="submit">Create</button>
-</form>
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .back-link {
+            margin-top: 15px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .back-link a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Create User</h2>
+
+    <div id="message" class="message"></div>
+
+    <form id="userForm">
+        <input type="text" placeholder="Name" id="username" required>
+        <input type="email" placeholder="Email" id="email" required>
+        <input type="text" placeholder="Phone" id="phone" required>
+        <input type="password" placeholder="Password" id="password" required>
+        <input type="text" value="user" id="role" disabled>
+        <button id="submitBtn" type="submit">Create</button>
+    </form>
+
+    <div class="back-link">
+        <a href="/dashboard.html">← Back to Dashboard</a>
+    </div>
+</div>
 
 <script>
+// Auth check
+const token = localStorage.getItem('token');
+
+if (!token) {
+    window.location.href = "/login.html";
+}
+
 document.getElementById('userForm').onsubmit = async (e) => {
     e.preventDefault();
 
+    const messageDiv = document.getElementById('message');
+    const button = document.getElementById('submitBtn');
+
+    messageDiv.textContent = "";
+    messageDiv.className = "message";
+
+    // loading state
+    button.disabled = true;
+    button.textContent = "Creating...";
+
     const res = await fetch('/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-            name: name.value,
+            name: username.value,
             email: email.value,
             phone: phone.value,
             password: password.value
@@ -24,6 +132,21 @@ document.getElementById('userForm').onsubmit = async (e) => {
     });
 
     const data = await res.json();
-    alert(JSON.stringify(data));
+
+    if (res.status === 201) {
+        messageDiv.textContent = "User created successfully!";
+        messageDiv.classList.add("success");
+
+        document.getElementById('userForm').reset();
+    } else {
+        messageDiv.textContent = data.error || "Failed to create user";
+        messageDiv.classList.add("error");
+    }
+
+    button.disabled = false;
+    button.textContent = "Create";
 };
 </script>
+
+</body>
+</html>

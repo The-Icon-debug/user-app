@@ -1,19 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const role = require('../middleware/role');
 
 
-// CREATE user (signup)
-router.post('/', async (req, res) => {
+// CREATE user (admin only)
+router.post('/', auth, role(['admin']), async (req, res) => {
     try {
         const { name, email, phone, password } = req.body;
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ ...req.body, password: hashedPassword });
+
+        const user = new User({
+            name,
+            email,
+            phone,
+            password: hashedPassword,
+            role: 'user'
+        });
         const savedUser = await user.save();
+
         res.status(201).json(savedUser);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -21,30 +29,6 @@ router.post('/', async (req, res) => {
 });
 
 
-// LOGIN
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-    
-    if (!user) {
-        return res.status(400).json({ error: "User not found" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
-
-    const token = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-    );
-
-    res.json({ token });
-});
-
-
-//  protected routes
 // GET all users
 router.get('/', auth, async (req, res) => {
     const users = await User.find().select('-password'); // Exclude password field
@@ -64,8 +48,8 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 
-// UPDATE user
-router.put('/:id', auth, async (req, res) => {
+// UPDATE user (user to only update their own profile, admin can update any)
+router.put('/:id', auth, role(['admin']), async (req, res) => {
     try {
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
@@ -82,8 +66,8 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 
-// DELETE user
-router.delete('/:id', auth, async (req, res) => {
+// DELETE user (admin only)
+router.delete('/:id', auth, role(['admin']), async (req, res) => {
     try {
         const deletedUser = await User.findByIdAndDelete(req.params.id);
 

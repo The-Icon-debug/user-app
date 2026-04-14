@@ -93,7 +93,7 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     const errorDiv = document.getElementById('error');
     errorDiv.textContent = "";
 
-    const res = await fetch('/users/login', {
+    const res = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
