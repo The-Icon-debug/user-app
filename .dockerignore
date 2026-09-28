@@ -1,10 +1,12 @@
 node_modules
 npm-debug.log
-.env
+.env*
 plan.txt
 Dockerfile
-docker-compose.yaml
+docker-compose*.yaml
 .dockerignore
 .gitignore
 .git
+.gitlab-ci.yml
 README.md
+/scripts

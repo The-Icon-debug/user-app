@@ -2,18 +2,21 @@ version: "3.8"
 
 services:
   web:
-    image: iconickyle/user-app:latest
     container_name: user-app
+    build: .
     ports:
       - "4000:4000"
     env_file:
       - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
     depends_on:
       - mongo
 
   mongo:
     image: mongo
-    container_name: mongo
     ports:
       - "27017:27017"
     environment:
@@ -25,7 +28,6 @@ services:
   
   mongo-express:
     image: mongo-express
-    container_name: mongo-express
     ports:
       - "8081:8081"
     environment:
