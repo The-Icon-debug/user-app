@@ -1,6 +1,6 @@
 # Node.js User Application
 
-A simple Node.js web application built with **Express** and **MongoDB**.
+A simple Node.js web application built with **Express** and **MongoDB**. 
 
 The application provides a basic user management and authentication workflow and serves the web interface directly from the Express application.
 
