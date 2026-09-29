@@ -22,7 +22,7 @@ build_and_push:
   script:
     - echo "Running build script..."
     - chmod +x scripts/build-image.sh
-    - ./scripts/build-image.sh --image $IMAGE_NAME --tag $TAG --latest true
+    - ./scripts/build-image.sh --image $IMAGE_NAME --tag $TAG --latest false
 
   only:
     - main

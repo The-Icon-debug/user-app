@@ -1,5 +1,5 @@
 # Use official Node.js image
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Set working directory
 WORKDIR /app
@@ -8,16 +8,16 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --only=production
+RUN npm ci --omit=dev
 
 # Copy rest of the app
 COPY . .
 
-# Create non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Set ownership
-RUN chown -R appuser:appgroup /app
+# Create non-root user with specific UID/GID for better control && Set ownership
+RUN addgroup -g 1000 appgroup && \
+    adduser -u 1000 -G appgroup -h /home/appuser -s /bin/bash -D appuser && \
+    chown -R appuser:appgroup /app && \
+    chmod -R 755 /app
 
 # Switch to non-root user
 USER appuser
@@ -26,4 +26,4 @@ USER appuser
 EXPOSE 4000
 
 # Start app
-CMD ["npm", "start"]
+CMD ["node", "index.js"]
