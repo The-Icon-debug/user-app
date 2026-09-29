@@ -14,10 +14,9 @@ RUN npm ci --omit=dev
 COPY . .
 
 # Create non-root user with specific UID/GID for better control && Set ownership
-RUN addgroup -g 1000 appgroup && \
-    adduser -u 1000 -G appgroup -h /home/appuser -s /bin/bash -D appuser && \
-    chown -R appuser:appgroup /app && \
-    chmod -R 755 /app
+RUN addgroup -g 1000 -S appgroup && \
+    adduser -u 1000 -S -G appgroup -h /home/appuser appuser && \
+    chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
